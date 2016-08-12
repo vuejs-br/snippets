@@ -1,2 +1,3 @@
-# snippets
-VueJS Brasil Community's Snippets
+# VueJS Brasil Community's Snippets
+
+Create a xxx file with the contents of your snippet.
