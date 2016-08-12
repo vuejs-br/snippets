@@ -1,3 +1,3 @@
 # VueJS Brasil Community's Snippets
 
-Create a xxx file with the contents of your snippet.
+Create a `.md` file with the contents of your snippet.
