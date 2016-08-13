@@ -1,4 +1,4 @@
-# Use multimple files in vue-router
+# Use multiple files in vue-router
 
 
 ```javascript
