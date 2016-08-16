@@ -6,11 +6,11 @@ Allows you to show or hide the element that contains this directive.
 
 Usage:
 
-`<my-element v-permission"'permission'">This can or cannot show to user...</my-element>`
+`<my-element v-permission="'permission'">This can or cannot show to user...</my-element>`
 
 Literal use:
 
-`<my-element v-permission"permission">This can or cannot show to user...</my-element>`
+`<my-element v-permission.literal="permission">This can or cannot show to user...</my-element>`
 
 PS: here 'permission' its a string value, not object.
 
@@ -25,6 +25,9 @@ Code:
  * Feel it free to modify/update this code =)
  */
 import Vue from 'vue'
+const { util, FragmentFactory } = Vue
+const isArray = Array.isArray
+const isProduction = process.env.NODE_ENV !== 'production'
 
 Vue.directive('permission', {
 
@@ -33,10 +36,10 @@ Vue.directive('permission', {
 
     let el = this.el
     if(!el.__vue__) {
-      this.anchor = Vue.util.createAnchor('v-permission')
-      Vue.util.replace(el, this.anchor)
+      this.anchor = util.createAnchor('v-permission')
+      util.replace(el, this.anchor)
     } else {
-      process.env.NODE_ENV !== 'production' && Vue.util.warn(
+      isProduction && util.warn(
         'v-permission="' + this.expression + '" cannot be ' +
         'used on an instance root element.',
         this.vm
@@ -46,7 +49,11 @@ Vue.directive('permission', {
   },
 
   hasPermission(value) {
-    return this.permissions.indexOf(value) > -1
+    if(isArray(this.permissions)) {
+      return this.permissions.indexOf(value) > -1
+    } else {
+      util.warn('this.permissions needs to be an Array')
+    }
   },
 
   update(value) {
@@ -62,7 +69,7 @@ Vue.directive('permission', {
 
   insert() {
     if(! this.frag) {
-      this.factory = new Vue.FragmentFactory(this.vm, this.el)
+      this.factory = new FragmentFactory(this.vm, this.el)
     }
     this.frag = this.factory.create(this._host, this._scope, this._frag)
     this.frag.before(this.anchor)
@@ -84,13 +91,13 @@ Vue.directive('permission', {
     if (!refs) return
     if (value) {
       if (Array.isArray(refs)) {
-        refs.push(findVmFromFrag(this._frag))
+        refs.push(util.findVmFromFrag(this._frag))
       } else {
-        refs[key] = findVmFromFrag(this._frag)
+        refs[key] = util.findVmFromFrag(this._frag)
       }
     } else {
       if (Array.isArray(refs)) {
-        refs.$remove(findVmFromFrag(this._frag))
+        refs.$remove(util.findVmFromFrag(this._frag))
       } else {
         refs[key] = null
         delete refs[key]
