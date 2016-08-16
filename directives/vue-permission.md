@@ -29,6 +29,11 @@ const { util, FragmentFactory } = Vue
 const isArray = Array.isArray
 const isProduction = process.env.NODE_ENV !== 'production'
 
+/* Directive to show a v-cannot element */
+Vue.directive('cannot', function () {
+  return
+})
+
 Vue.directive('permission', {
 
   bind() {
@@ -36,6 +41,13 @@ Vue.directive('permission', {
 
     let el = this.el
     if(!el.__vue__) {
+      //check v-cannot block
+      var next = el.nextElementSibling
+      if (next && util.getAttr(next, 'v-cannot') !== null) {
+        util.remove(next)
+        this.elseEl = next
+      }
+      //check permission block
       this.anchor = util.createAnchor('v-permission')
       util.replace(el, this.anchor)
     } else {
@@ -59,8 +71,10 @@ Vue.directive('permission', {
   update(value) {
     if(this.invalid) return
     if(this.hasPermission(value)) {
-      this.insert()
-      this.updateRef(value)
+      if(! this.frag) {
+        this.insert()
+        this.updateRef(value)
+      }
     } else {
       this.updateRef(value)
       this.remove()
@@ -68,7 +82,11 @@ Vue.directive('permission', {
   },
 
   insert() {
-    if(! this.frag) {
+    if (this.elseFrag) {
+      this.elseFrag.remove()
+      this.elseFrag = null
+    }
+    if(! this.factory) {
       this.factory = new FragmentFactory(this.vm, this.el)
     }
     this.frag = this.factory.create(this._host, this._scope, this._frag)
@@ -79,6 +97,16 @@ Vue.directive('permission', {
     if(this.frag){
       this.frag.remove()
       this.frag = null
+    }
+    if (this.elseEl && !this.elseFrag) {
+      if (!this.elseFactory) {
+        this.elseFactory = new FragmentFactory(
+          this.elseEl._context || this.vm,
+          this.elseEl
+        )
+      }
+      this.elseFrag = this.elseFactory.create(this._host, this._scope, this._frag)
+      this.elseFrag.before(this.anchor)
     }
   },
 
@@ -108,6 +136,9 @@ Vue.directive('permission', {
   unbind() {
     if (this.frag) {
       this.frag.destroy()
+    }
+    if (this.elseFrag) {
+      this.elseFrag.destroy()
     }
   }
 })
