@@ -12,12 +12,12 @@ import Clients from '/modules/clients/routes.js'
 
 const Router = new VueRouter()
 
-const routes = Object.assing({}, Dashboard, Users, Clients)
+const routes = Object.assign({}, Dashboard, Users, Clients)
 Router.map(routes)
 
 //  --- alternative ---
 const routes = [Dashboard, Users, Clients]
-Router.map(Object.assing({}, ...routes)
+Router.map(Object.assign({}, ...routes)
 
 export default Router
 ```
